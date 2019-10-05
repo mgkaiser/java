@@ -34,6 +34,8 @@ public class JFacts extends JFrame implements ActionListener
 		// Setup the frame
 		super("Facts About Otters");
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);		
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		setLocation(dim.width / 2 - getSize().width / 2, dim.height / 2 - getSize().height / 2);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		// Set the layout
@@ -69,8 +71,7 @@ public class JFacts extends JFrame implements ActionListener
 	{
 		_factLabels[_nextLabelToReplace].setText(GetNextOtterFact());
 		_nextLabelToReplace++;
-		if (_nextLabelToReplace >= NUM_LABELS) _nextLabelToReplace = 0;
-		//super.update(this.getGraphics());		
+		if (_nextLabelToReplace >= NUM_LABELS) _nextLabelToReplace = 0;		
 	}
 	
 	public static void main(String[] args) 
