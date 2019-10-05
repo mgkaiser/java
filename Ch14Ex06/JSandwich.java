@@ -5,6 +5,8 @@ import javax.swing.event.*;
 import java.awt.*; 
 import java.awt.event.*;
 import javax.swing.*; 
+import java.text.NumberFormat;
+import java.util.Locale;
 
 public class JSandwich extends JFrame implements ListSelectionListener, ActionListener
 {	
@@ -18,7 +20,8 @@ public class JSandwich extends JFrame implements ListSelectionListener, ActionLi
 	private JList _breadList;
 	private JList _meatList;
 	private JList _cheeseList;
-	private JLabel _sandiwchAmountLabel;
+	private JLabel _sandwichAmountLabel;
+	private JButton _makeSandwichButton;
 		
 	public JSandwich()
 	{
@@ -50,14 +53,16 @@ public class JSandwich extends JFrame implements ListSelectionListener, ActionLi
 		cheeseListModel.addElement(new JSandwichItems("American", 0.50));
 		cheeseListModel.addElement(new JSandwichItems("Provolone", 0.75));
 		cheeseListModel.addElement(new JSandwichItems("Cheddar", 1.25));
+		cheeseListModel.addElement(new JSandwichItems("Swiss", 0.65));
 		_cheeseList = ListFactory(cheeseListModel);				
 						
 		// Make Sandwich Button
-		JButton makeSandwichButton = new JButton("Make My Sandwich");				
-		makeSandwichButton.addActionListener(this);
+		_makeSandwichButton = new JButton("Make My Sandwich");				
+		_makeSandwichButton.addActionListener(this);
+		_makeSandwichButton.setEnabled(false);
 		
 		// Sandwich Amount
-		_sandiwchAmountLabel = LabelFactory("$0.00", _labelFont);
+		_sandwichAmountLabel = LabelFactory("$0.00", _labelFont);
 		
 		// Sandwich choices panel.  Contains bread, meat, and cheese panel
 		JPanel sandwichChoicesPanel = new JPanel();		
@@ -68,13 +73,13 @@ public class JSandwich extends JFrame implements ListSelectionListener, ActionLi
 							
 		// Button panel.  Contains the "Make Sandwich" button
 		JPanel buttonPanel = new JPanel();
-		buttonPanel.add(makeSandwichButton);		
+		buttonPanel.add(_makeSandwichButton);		
 		add(buttonPanel);			
 				
 		// Sandwich Amount panel.  Contains the amount prompt and amount labels.
 		JPanel sandwichAmountPanel = new JPanel();		
 		sandwichAmountPanel.add(LabelFactory("Your sandwich costs: ", _labelFont));
-		sandwichAmountPanel.add(_sandiwchAmountLabel);
+		sandwichAmountPanel.add(_sandwichAmountLabel);
 		add(sandwichAmountPanel);
 		
 		// Make it visible
@@ -107,16 +112,61 @@ public class JSandwich extends JFrame implements ListSelectionListener, ActionLi
 		label.setFont(font);
 		return label;
 	}
+	
+	private double GetPriceFromList(JList list)
+	{
+		double price = 0;
+		JSandwichItems selectedItem = (JSandwichItems)list.getSelectedValue();
+		if (selectedItem != null) price = selectedItem.getPrice();
+		return price;
+	}
+	
+	private void CalculateThePrice()
+	{
+		// Calculate the price
+		double breadPrice = GetPriceFromList(_breadList);
+		double meatPrice = GetPriceFromList(_meatList);
+		double cheesePrice = GetPriceFromList(_cheeseList);		
+		double price = breadPrice + meatPrice + cheesePrice;
+
+		// Change the label
+		_sandwichAmountLabel.setText(NumberFormat.getCurrencyInstance(new Locale("en", "US")).format(price));
+		
+		// If there is a selection in all 3 boxes, enable the "Make Sandwich" button.
+		_makeSandwichButton.setEnabled((breadPrice > 0) && (meatPrice > 0) && (cheesePrice > 0));
+	}
+	
+	private String GetDescriptionFromList(JList list)
+	{
+		return ((JSandwichItems)list.getSelectedValue()).getDescription();
+	}
+	
+	private void MakeTheSandwich()
+	{
+		// Gather the selections
+		String selectedBread = GetDescriptionFromList(_breadList);
+		String selectedMeat = GetDescriptionFromList(_meatList);
+		String selectedCheese = GetDescriptionFromList(_cheeseList);
+		
+		// Display the message
+		String message = "Making your " + selectedMeat + " and " + selectedCheese + " on " + selectedBread + ".";
+		JOptionPane.showMessageDialog(null, message	);
+		
+		// Clear the selection
+		_breadList.clearSelection();
+		_meatList.clearSelection();
+		_cheeseList.clearSelection();
+	}
 		
 	public void valueChanged(ListSelectionEvent e) 
 	{
-		JOptionPane.showMessageDialog(null, "List Select");
+		CalculateThePrice();
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
-		JOptionPane.showMessageDialog(null, "Sandwich Make");
+		MakeTheSandwich();
 	}
 			
 	public static void main(String[] args) 
